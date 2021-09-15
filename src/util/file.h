@@ -3,15 +3,15 @@
 #include "mez.h"
 #include <stdio.h>
 
-struct File {
+typedef struct File {
   const char *path;
   FILE *fp;
-};
+} File;
 
-void FileCreate(struct File *f);
-void FileOpen(struct File *f, const char *args);
-void FileClose(struct File *f);
-void FileStop(struct File *f);
+void FileCreate(File *f);
+void FileOpen(File *f, const char *args);
+void FileClose(File *f);
+void FileStop(File *f);
 
 
 #endif

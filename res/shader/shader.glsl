@@ -18,6 +18,8 @@ void main() {
 out vec4 color;
 in vec2 texcoords;
 
+uniform sampler2D tex;
+
 void main() {
-  color = vec4(texcoords, 0.7, 1.0);
+  color = texture(tex, texcoords);
 }

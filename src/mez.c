@@ -3,6 +3,8 @@
 #include "ui/window.h"
 #include "ui/render/shader.h"
 #include "ui/render/renderer.h"
+#include "ui/render/image.h"
+#include "ui/render/texture.h"
 #include "ui/gl.h"
 #include "util/log.h"
 #include <time.h>
@@ -16,6 +18,7 @@ static Shader shader;
 static VertexArray VAO = {0};
 static VertexBuffer VBO = {0};
 static IndexBuffer EBO = {0};
+static Texture tex = {0};
 static mat4 MVP;
 
 void init_renderer();
@@ -88,6 +91,9 @@ int main(int argc, char **argv) {
   LoadShaderFile(&shader, "res/shader/shader.glsl");
   CompileShader(&shader);
 
+  Image im; LoadPNG(&im, "res/img/img.png");
+  CreateTexture(&tex); ApplyImageToTexture(&tex, &im);
+
   r = 1;
   pos.Z = -2;
   
@@ -107,7 +113,8 @@ int main(int argc, char **argv) {
 }
 
 void init_renderer() {
-  glEnable(GL_DEPTH);
+  glDepthFunc(GL_LESS); 
+  glEnable(GL_DEPTH_TEST);
 
   static const float verticies[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -165,21 +172,26 @@ void init_renderer() {
 
 
 void render() {
-  static const Uniform mvp = {.name = "MVP"};
+  static const Uniform u_mvp = {.name = "MVP"};
+  static const Uniform u_tex = {.name = "tex"};
 
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-  ShaderSetMat4(&shader, mvp, MVP);
+  glActiveTexture(GL_TEXTURE0);
+  BindTexture(0, &tex);
+
   BindShader(&shader);
+  ShaderSetInt(&shader, u_tex, 0);
+  ShaderSetMat4(&shader, u_mvp, MVP);
 
   BindVertexBuffer(&VBO);
   BindVertexArray(&VAO);
 
   glDrawArrays(GL_TRIANGLES, 0, 36);
 
-  //  UnbindVertexBuffer();
-  //  UnbindShader();
+  UnbindVertexBuffer();
+  UnbindShader();
   UnbindVertexArray();
 }
 

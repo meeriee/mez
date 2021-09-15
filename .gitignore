@@ -1,0 +1,14 @@
+compile_commands.json
+.obj/
+mez
+.cache/
+.ccls-cache/
+
+#*
+.#*
+*/#*
+*/.#*
+*/*/#*
+*/*/.#*
+*/*/*/#*
+*/*/*/.#*

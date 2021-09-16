@@ -20,7 +20,7 @@ typedef struct Projection{
 
 typedef struct Camera {
   vec3 position;
-  vec3 rotation;
+  quaternion rotation;
 
   Projection proj;
 

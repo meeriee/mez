@@ -16,6 +16,7 @@ void CalculateCamera(Camera *cam) {
   }
 
   view = Translate(cam->position); 
+  view = MulMat4(QuaternionToMat4(cam->rotation), view);
 
   result = MulMat4(view, result);
   result = MulMat4(proj, result);

@@ -40,7 +40,6 @@ f32 gettime() {
 
 #define MOVE 1
 
-vec3 pos = {0};
 bool keys[1024];
 
 void window_callback(Event e) {
@@ -94,17 +93,23 @@ int main(int argc, char **argv) {
   r = 1;
 
   camera.position = Vec3(0, 0, 0);
+  camera.rotation = QuaternionFromAngle(Vec3(0,0,0), 0);
   camera.proj.type = PROJECTION_PERSPECTIVE;
   camera.proj.Persp.aspect = 1;
   camera.proj.Persp.fov = 90;
   camera.proj.near = 0.001;
   camera.proj.far = 1000;
+
   
+  static vec3 pos = {0};
+  static quaternion rotation;
+
   pos = Vec3(0, 0, -1);
   f32 T = gettime();
   for (;r;) {
     Model = Mat4d(1);
-    Model = MulMat4(Rotate(fmodf(T, 360.0), Vec3(1,1,0)), Model);
+    rotation = QuaternionFromAngle(Vec3(1,1,0), fmodf(T, 360.0));
+    Model = MulMat4(QuaternionToMat4(rotation), Model);
     Model = MulMat4(Translate(pos), Model);
 
     CalculateCamera(&camera);

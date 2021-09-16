@@ -445,3 +445,143 @@ void mat4buffer(mat4 m, float *buffer) {
     }
   }
 }
+
+quaternion Quaternion(f32 x, f32 y, f32 z, f32 w) {
+  quaternion result = {0};
+  result.X = x;
+  result.Y = y;
+  result.Z = z;
+  result.W = w;
+  return result;
+}
+
+quaternion QuaternionV4(vec4 v) {
+  quaternion result = {0};
+  result.X = v.X;
+  result.Y = v.Y;
+  result.Z = v.Z;
+  result.W = v.W;
+  return result;
+}
+
+
+quaternion AddQuaternion(quaternion a, quaternion b) {
+  quaternion result = {0};
+  result.X = a.X + b.X;
+  result.Y = a.Y + b.Y;
+  result.Z = a.Z + b.Z;
+  result.W = a.W + b.W;
+  return result;
+}
+
+quaternion SubQuaternion(quaternion a, quaternion b) {
+  quaternion result = {0};
+  result.X = a.X - b.X;
+  result.Y = a.Y - b.Y;
+  result.Z = a.Z - b.Z;
+  result.W = a.W - b.W;
+  return result;
+}
+
+quaternion MulQuaternion(quaternion a, quaternion b) {
+  quaternion result = {0};
+  result.X = ( a.X * b.W) + (a.Y * b.Z) - (a.Z * b.Y) + (a.W * b.X);
+  result.Y = (-a.X * b.Z) + (a.Y * b.W) + (a.Z * b.X) + (a.W * b.Y);
+  result.Z = ( a.X * b.Y) - (a.Y * b.X) + (a.Z * b.W) + (a.W * b.Z);
+  result.W = (-a.X * b.X) - (a.Y * b.Y) - (a.Z * b.Z) + (a.W * b.W);
+  return result;
+}
+
+quaternion MulQuaternionF(quaternion a, f32 f) {
+  quaternion result = {0};
+  result.X = a.X * f;
+  result.Y = a.Y * f;
+  result.Z = a.Z * f;
+  result.W = a.W * f;
+  return result;
+}
+
+quaternion DivQuaternionF(quaternion a, f32 f) {
+  quaternion result = {0};
+  result.X = a.X / f;
+  result.Y = a.Y / f;
+  result.Z = a.Z / f;
+  result.W = a.W / f;
+  return result;
+}
+
+f32 DotQuaternion(quaternion a, quaternion b) {
+  f32 result = {0};
+  result = (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z) + (a.W * b.W);
+  return result;
+}
+
+quaternion InverseQuaternion(quaternion a) {
+  quaternion result = {0};
+  result.X = -a.X;
+  result.Y = -a.Y;
+  result.Z = -a.Z;
+  result.W = a.W;
+
+  result = DivQuaternionF(result, DotQuaternion(a,a));
+
+  return result;
+}
+
+quaternion NormalizeQuaternion(quaternion a) {
+  quaternion result = {0};
+  f32 len = sqrtf(DotQuaternion(a,a));
+  result = DivQuaternionF(a, len);
+  return result;
+}
+
+mat4 QuaternionToMat4(quaternion a) {
+  mat4 result = {0};
+
+  quaternion q = NormalizeQuaternion(a);
+
+  f32 XX = q.X * q.X;
+  f32 YY = q.Y * q.Y;
+  f32 ZZ = q.Z * q.Z;
+  f32 XY = q.X * q.Y;
+  f32 XZ = q.X * q.Z;
+  f32 YZ = q.Y * q.Z;
+  f32 WX = q.W * q.X;
+  f32 WY = q.W * q.Y;
+  f32 WZ = q.W * q.Z;
+
+  result.elems[0][0] = 1 - 2 * (YY + ZZ);
+  result.elems[0][1] = 2 * (XY + WZ);
+  result.elems[0][2] = 2 * (XZ - WY);
+  result.elems[0][3] = 0;
+
+  result.elems[1][0] = 2 * (XY - WZ);
+  result.elems[1][1] = 1 - 2 * (XX + ZZ);
+  result.elems[1][2] = 2 * (YZ + WX);
+  result.elems[1][3] = 0;
+
+  result.elems[2][0] = 2 * (XZ + WY);
+  result.elems[2][1] = 2 * (YZ - WX);
+  result.elems[2][2] = 1 - 2 * (XX + YY);
+  result.elems[2][3] = 0;
+
+  result.elems[3][0] = 0;
+  result.elems[3][1] = 0;
+  result.elems[3][2] = 0;
+  result.elems[3][3] = 1;
+
+  return result;
+}
+
+quaternion QuaternionFromAngle(vec3 a, f32 r) {
+  quaternion result = {0};
+
+  vec3 axis = NormalizeVec3(a);
+  f32 sine_of_rot = sin(r/2);
+
+  result.XYZ = MulVec3f(axis, sine_of_rot);
+  result.W = cosf(r/2);
+
+  return result;
+}
+

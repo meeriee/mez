@@ -50,7 +50,7 @@ typedef union vec4 {
   f32 elems[4];
 } vec4;
 
-typedef union Quaternion {
+typedef union quaternion {
   struct {
     union {
       vec3 XYZ;
@@ -61,7 +61,7 @@ typedef union Quaternion {
     f32 W;
   };
   f32 elems[4];
-} Quaternion;
+} quaternion;
 
 typedef union mat4 {
   f32 elems[4][4];
@@ -138,6 +138,19 @@ mat4 LookAt(vec3 eye, vec3 center, vec3 up);
 
 void mat4buffer(mat4 m, f32 *buffer);
 
+quaternion Quaternion(f32 x, f32 y, f32 z, f32 w);
+quaternion QuaternionV4(vec4 v);
+
+quaternion AddQuaternion(quaternion a, quaternion b);
+quaternion SubQuaternion(quaternion a, quaternion b);
+quaternion MulQuaternion(quaternion a, quaternion b);
+quaternion MulQuaternionF(quaternion a, f32 f);
+quaternion DivQuaternionF(quaternion a, f32 f);
+f32 DotQuaternion(quaternion a, quaternion b);
+quaternion InverseQuaternion(quaternion a);
+quaternion NormalizeQuaternion(quaternion a);
+mat4 QuaternionToMat4(quaternion a);
+quaternion QuaternionFromAngle(vec3 a, f32 r);
 
 
 

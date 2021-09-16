@@ -5,9 +5,11 @@
 #include "ui/render/renderer.h"
 #include "ui/render/image.h"
 #include "ui/render/texture.h"
+#include "ui/render/camera.h"
 #include "ui/gl.h"
 #include "util/log.h"
 #include <time.h>
+#include <math.h>
 
 #include "event.h"
 
@@ -19,7 +21,11 @@ static VertexArray VAO = {0};
 static VertexBuffer VBO = {0};
 static IndexBuffer EBO = {0};
 static Texture tex = {0};
+
 static mat4 MVP;
+static mat4 Model;
+
+static Camera camera;
 
 void init_renderer();
 void render();
@@ -32,10 +38,10 @@ f32 gettime() {
   return ((f32)current_time.tv_nsec + current_time.tv_sec * 1000000000)/1000000000.0;
 }
 
-#define MOVE_X 0.05
-#define MOVE_Y 0.05
+#define MOVE 1
 
 vec3 pos = {0};
+bool keys[1024];
 
 void window_callback(Event e) {
   switch (e.type) {
@@ -51,6 +57,7 @@ void window_callback(Event e) {
   } break;
   case EVENT_KEY_RELEASE: {
     const i32 key = e.args[0].i32data, modifiers = e.args[2].i32data;
+    keys[key] = false;
     switch (key) {
     case GLFW_KEY_ESCAPE:
       r = 0; break;
@@ -60,17 +67,7 @@ void window_callback(Event e) {
   } break;
   case EVENT_KEY_PRESS: {
     const i32 key = e.args[0].i32data, modifiers = e.args[2].i32data;
-    switch (key) {
-    case GLFW_KEY_RIGHT:
-      pos = AddVec3(pos, Vec3(MOVE_X, 0, 0)); break;
-    case GLFW_KEY_LEFT:
-      pos = AddVec3(pos, Vec3(-MOVE_X, 0, 0)); break;
-    case GLFW_KEY_UP:
-      pos = AddVec3(pos, Vec3(0, MOVE_Y, 0)); break;
-    case GLFW_KEY_DOWN:
-      pos = AddVec3(pos, Vec3(0, -MOVE_Y, 0)); break;
-    default: break;
-    }
+    keys[key] = true;
   }
   default: break;
   }
@@ -95,14 +92,46 @@ int main(int argc, char **argv) {
   CreateTexture(&tex); ApplyImageToTexture(&tex, &im);
 
   r = 1;
-  pos.Z = -2;
+
+  camera.position = Vec3(0, 0, 0);
+  camera.proj.type = PROJECTION_PERSPECTIVE;
+  camera.proj.Persp.aspect = 1;
+  camera.proj.Persp.fov = 90;
+  camera.proj.near = 0.001;
+  camera.proj.far = 1000;
   
+  pos = Vec3(0, 0, -1);
   f32 T = gettime();
   for (;r;) {
-    MVP = MulMat4(Persp(120, 1, 0.001, 1000), Translate(pos));
+    Model = Mat4d(1);
+    Model = MulMat4(Rotate(fmodf(T, 360.0), Vec3(1,1,0)), Model);
+    Model = MulMat4(Translate(pos), Model);
+
+    CalculateCamera(&camera);
+
+    MVP = Mat4d(1);
+    MVP = MulMat4(Model, MVP);
+    MVP = MulMat4(camera.matrix, MVP);
+
     render();
     glfwPollEvents();
     glfwSwapBuffers(wnd.wnd);
+
+    if (keys[GLFW_KEY_W])
+      camera.position = AddVec3(camera.position, Vec3(0, 0, delta*MOVE));
+    if (keys[GLFW_KEY_S])
+      camera.position = AddVec3(camera.position, Vec3(0, 0, -delta*MOVE));
+    if (keys[GLFW_KEY_A])
+      camera.position = AddVec3(camera.position, Vec3(delta*MOVE, 0, 0));
+    if (keys[GLFW_KEY_D])
+      camera.position = AddVec3(camera.position, Vec3(-delta*MOVE, 0, 0));
+
+    if (keys[GLFW_KEY_UP])
+      camera.position = AddVec3(camera.position, Vec3(0, -delta*MOVE, 0));
+    if (keys[GLFW_KEY_DOWN])
+      camera.position = AddVec3(camera.position, Vec3(0, delta*MOVE, 0));
+
+    //    printf("%.2f %.2f %.2f\n", camera.position.X, camera.position.Y, camera.position.Z);
 
     const f32 Tb = gettime();
     delta = Tb - T;

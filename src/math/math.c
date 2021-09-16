@@ -353,9 +353,24 @@ mat4 Translate(vec3 v){
 }
 mat4 Rotate(f32 a, vec3 v){
   mat4 result = Mat4d(1);
-  TODO("implement rotation");
-  (void)a;
-  (void)v;
+  v = NormalizeVec3(v);
+
+  f32 sin_theta = sinf(a);
+  f32 cos_theta = cosf(a);
+  f32 cos_value = 1.0f - cos_theta;
+
+  result.elems[0][0] = (v.X * v.X * cos_value) + cos_theta;
+  result.elems[0][1] = (v.X * v.Y * cos_value) + (v.Z * sin_theta);
+  result.elems[0][2] = (v.X * v.Z * cos_value) - (v.Y * sin_theta);
+
+  result.elems[1][0] = (v.Y * v.X * cos_value) - (v.Z * sin_theta);
+  result.elems[1][1] = (v.Y * v.Y * cos_value) + cos_theta;
+  result.elems[1][2] = (v.Y * v.Z * cos_value) + (v.X * sin_theta);
+
+  result.elems[2][0] = (v.Z * v.X * cos_value) + (v.Y * sin_theta);
+  result.elems[2][1] = (v.Z * v.Y * cos_value) - (v.X * sin_theta);
+  result.elems[2][2] = (v.Z * v.Z * cos_value) + cos_theta;
+
   return result;
 }
 mat4 Scale(vec3 v){

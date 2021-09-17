@@ -1,7 +1,7 @@
 include config.mk
 
 CC ?= gcc
-CFLAGS += -fPIC -Wall -Wextra -Wshadow -Wcast-align -Wunused -Wpedantic -Wnull-dereference -Wformat=2 -march=native -I"src/"
+CFLAGS += -fPIC -Wall -Wextra -Wshadow -Wcast-align -Wunused -Wpedantic -Wnull-dereference -Wformat=2 -march=native -I"src/" -I"src/engine" -I"src/game"
 ifndef DEBUG
 	ADDITIONAL_CFLAGS ?= -O3
 	SANITIZERS =
@@ -18,11 +18,11 @@ RM ?= rm -f
 SRC ?= src
 OBJ ?= .obj
 
-SRCS += $(wildcard $(SRC)/*.c)
-SRCS += $(wildcard $(SRC)/ui/*.c) 
-SRCS += $(wildcard $(SRC)/ui/render/*.c) 
-SRCS += $(wildcard $(SRC)/util/*.c)
-SRCS += $(wildcard $(SRC)/math/*.c)
+SRCS += $(wildcard $(SRC)/game/*.c)
+SRCS += $(wildcard $(SRC)/engine/ui/*.c) 
+SRCS += $(wildcard $(SRC)/engine/ui/render/*.c) 
+SRCS += $(wildcard $(SRC)/engine/util/*.c)
+SRCS += $(wildcard $(SRC)/engine/math/*.c)
 
 OBJS += $(patsubst $(SRC)/%.c,$(OBJ)/src/%.o,$(SRCS))
 
